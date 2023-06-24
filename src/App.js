@@ -1,23 +1,45 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState, useEffect } from "react";
+import "./App.css";
+import AddProduct from "./Components/Products/AddProducts/AddProduct";
+import ListOfProducts from "./Components/Products/ListProducts/ListOfProducts";
 
 function App() {
+  const [productList, SetProductList] = useState([]);
+
+  useEffect(() => {
+    const savedProducts = localStorage.getItem("productList");
+    if (savedProducts) {
+      SetProductList(JSON.parse(savedProducts));
+    }
+  }, []);
+
+  // Save products to local storage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("productList", JSON.stringify(productList));
+  }, [productList]);
+
+  const addProductHandler = (productId, prodcutPrice, productName) => {
+    const newProduct = {
+      id: productId,
+      price: parseFloat(prodcutPrice),
+      name: productName,
+    };
+
+    SetProductList([...productList, newProduct]);
+  };
+
+  const deleteProductHandler = (productId) => {
+    const updatedProducts = productList.filter(
+      (product) => product.id !== productId
+    );
+
+    SetProductList(updatedProducts);
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <AddProduct onAddProduct={addProductHandler} />
+      <ListOfProducts products={productList} onDelete={deleteProductHandler} />
     </div>
   );
 }
